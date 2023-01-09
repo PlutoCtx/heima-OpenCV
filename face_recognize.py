@@ -24,14 +24,15 @@ import cv2
 	检测多张人脸
 """
 import cv2 as cv
-__all__ = [cv2]
+# __all__ = [cv2]
 def face_detect_demo():
 	# 将图片转为灰度图片
 	gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 	# 加载特征数据
 	face_detector = cv.CascadeClassifier('D:\Program Files\OpenCV\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml')
-	faces = face_detector.detectMultiScale(gray)
+	faces = face_detector.detectMultiScale(gray, scaleFactor=1.02, minNeighbors=7, maxSize=(60, 60), minSize=(51, 51))
 	for x, y, w, h in faces:
+		print(x, y, w, h)
 		cv.rectangle(img, (x, y), (x + w, y + h), color=(0, 0, 255), thickness=2)
 		cv.circle(img, center=(x+w//2, y+h//2), radius=w//2, color=(0, 255, 0), thickness=2)
 	# 显示图片
