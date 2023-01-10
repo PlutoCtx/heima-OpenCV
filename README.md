@@ -200,3 +200,99 @@ cv.deatroyAllWindows()
 cap.release()
 ```
 
+# 人脸识别
+
+​		人脸检测是 OpenCV 的一个很不错的功能，它是人脸识别的基础。什么是人脸识别呢？其实就是一个程序能识别给定图像或视频中的人脸。实现这一目标的方法之一是用一系列分好类的图像来"训练"程序，并基于这些图像来进行识别。
+
+​		这就是OpenCV及其人脸识别模块进行人脸识别的过程
+
+​		人脸识别模块的另外一个重要特征是：每个识别都具有转置信 (confidence)评分，因此可在实际应用中通过对其设置阙值来进行筛选。
+​		人脸识别所需要的人脸可以通过两种方式来得到：自己获得图像或从人脸数据库免费获得可用的人脸图像。互联网上有许多人脸数据库:
+​		https://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html
+​		为了对这些样本进行人脸识别，必须要在包含人脸的样本图像上进行人脸识别。这是一个学习的过程，但并不像自己提供的图像那样令人满意
+
+## 训练数据
+
+​		有了数据，需要将这些样本图像加载到人脸识别算法中。所有的人脸识别算法在它们的train()函数中都有两个参数：图像数组和标签数组。这些标签表示进行识别时候某人人脸的ID，因此根据ID可以知道被识别的人是谁。要做到这一点，将在【trainer/】小目录中保存为yml文件。
+
+​		在使用Python3&OpenCV3.0.0进行人脸识别训练时发现异常：
+​		AttributeError: module’ object has no attribute “LBPHFaceRecognizer create’OpenCV，需要安装opencv-contrib-python 模块，直接使用pip就可以进行安装，命令如下：
+
+```bash
+pip install opencv-contrib-python
+```
+
+## 训练数据
+
+```python
+import os
+import cv2
+import numpy as np
+import sys
+from PIL import Image
+
+detector = cv2.CascadeClassifier("D:\Program Files\OpenCV\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml")
+
+def getImageAndLabels(path):
+	imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
+	faceSamples = []
+	ids = []
+	# 检测人脸
+	# 遍历列表中的图片
+	for imagePath in imagePaths:
+		# 打开图片
+		PIL_img = Image.open(imagePath).convert('L')	# convert it to grayscale
+		img_numpy = np.array(PIL_img, 'uint8')
+
+		faces = detector.detectMultiScale(img_numpy)
+		# 获取每张图片的id
+		id = int(os.path.split(imagePath)[-1].split(".")[0])
+		# print(os.path.split(imagePath))
+		for (x, y, w, h) in faces:
+			faceSamples.append(img_numpy[y: y + h, x: x + w])
+			ids.append(id)
+	return faceSamples, ids
+
+if __name__ == '__main__':
+	# 图片路径
+	path = './data/jm/'
+	faces, ids = getImageAndLabels(path)
+	# 获取循环对象
+	recognizer = cv2.face.LBPHFaceRecognizer_create()
+	recognizer.train(faces, np.array(ids))
+	# Save the model into trainer/trainer.yml
+	recognizer.write('./data/trainer.yml')
+```
+
+
+
+# **基于** **LBPH** **的人脸识别**
+
+​		LBPH（Local Binary Pattern Histogram）将检测到的人脸分为小单元，并将其与模型中的对应单元进行比较，对每个区域的匹配值产生一个直方图。由于这种方法的灵活性，LBPH是唯一允许模型样本人脸和检测到的人脸在形状、大小上可以不同的人脸识别算法。
+
+​		调整后的区域中调用 predict()函数，该函数返回两个元素的数组：第一个元素是所识别个体的标签，第二个是置信度评分。所有的算法都有一个置信度评分阈值，置信度评分用来衡量所识别人脸与原模型的差距，0 表示完全匹配。可能有时不想保留所有的识别结果，则需要进一步处理，因此可用自己的算法来估算识别的置信度评分。LBPH 一个好的识别参考值要低于 50 ，任何高于 80 的参考值都会被认为是低的置信度评分。
+
+### **【示例】基于** **LBPH** **的人脸识别**
+
+```python
+import cv2
+import numpy as np
+import os
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+recognizer.read('trainer/trainer.yml')
+faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+font = cv2.FONT_HERSHEY_SIMPLEX
+id = 0
+img=cv2.imread('9.pgm') #识别的图片
+gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+faces = faceCascade.detectMultiScale(gray,scaleFactor = 1.2,minNeighbors = 5)
+for(x,y,w,h) in faces:
+    cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
+    id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
+    print(id,confidence)
+
+cv2.imshow('camera',img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
