@@ -151,69 +151,71 @@ import cv2
 """
 	训练数据
 """
-# import os
-# import cv2
-# import numpy as np
-# import sys
-# from PIL import Image
-#
-# detector = cv2.CascadeClassifier("D:\Program Files\OpenCV\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml")
-#
-# def getImageAndLabels(path):
-# 	imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
-# 	faceSamples = []
-# 	ids = []
-# 	# 检测人脸
-# 	# 遍历列表中的图片
-# 	for imagePath in imagePaths:
-# 		# 打开图片
-# 		PIL_img = Image.open(imagePath).convert('L')	# convert it to grayscale
-# 		img_numpy = np.array(PIL_img, 'uint8')
-#
-# 		faces = detector.detectMultiScale(img_numpy)
-# 		# 获取每张图片的id
-# 		id = int(os.path.split(imagePath)[-1].split(".")[0])
-# 		# print(os.path.split(imagePath))
-# 		for (x, y, w, h) in faces:
-# 			faceSamples.append(img_numpy[y: y + h, x: x + w])
-# 			ids.append(id)
-# 	return faceSamples, ids
-#
-# if __name__ == '__main__':
-# 	# 图片路径
-# 	path = './data/jm/'
-# 	faces, ids = getImageAndLabels(path)
-# 	# 获取循环对象
-# 	recognizer = cv2.face.LBPHFaceRecognizer_create()
-# 	recognizer.train(faces, np.array(ids))
-# 	# Save the model into trainer/trainer.yml
-# 	recognizer.write('./data/trainer.yml')
-
-
-
-
-
-
+import os
 import cv2
 import numpy as np
-import os
-# 加载训练数据集文件
-recognizer = cv2.face.LBPHFaceRecognizer_create()
-recognizer.read('./data/trainer.yml')
+import sys
+from PIL import Image
 
-faceCascade = cv2.CascadeClassifier("D:\Program Files\OpenCV\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml")
-font = cv2.FONT_HERSHEY_SIMPLEX
-id = 0
-# 准备识别的图片
-img = cv2.imread('./data/jm/1.pgm') #识别的图片
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-faces = faceCascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
-for(x, y, w, h) in faces:
-    cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
-    #人脸识别
-    id, confidence = recognizer.predict(gray[y:y+h, x:x+w])
-    print('标签id:', id, '置信评分:', confidence)
+detector = cv2.CascadeClassifier("D:\Program Files\OpenCV\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml")
 
-cv2.imshow('camera', img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+def getImageAndLabels(path):
+	imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
+	faceSamples = []
+	ids = []
+	# 检测人脸
+	# 遍历列表中的图片
+	for imagePath in imagePaths:
+		# 打开图片
+		PIL_img = Image.open(imagePath).convert('L')	# convert it to grayscale
+		img_numpy = np.array(PIL_img, 'uint8')
+
+		faces = detector.detectMultiScale(img_numpy)
+		# 获取每张图片的id
+		id = int(os.path.split(imagePath)[-1].split(".")[0])
+		# print(os.path.split(imagePath))
+		for (x, y, w, h) in faces:
+			faceSamples.append(img_numpy[y: y + h, x: x + w])
+			ids.append(id)
+    # print("id:", id)
+    # print("fs:", faceSamples)
+	return faceSamples, ids
+
+if __name__ == '__main__':
+	# 图片路径
+	path = './data/jm02/'
+	faces, ids = getImageAndLabels(path)
+	# 获取循环对象
+	recognizer = cv2.face.LBPHFaceRecognizer_create()
+	recognizer.train(faces, np.array(ids))
+	# Save the model into trainer/trainer.yml
+	recognizer.write('./data/trainer02.yml')
+
+
+
+
+
+
+# import cv2
+# import numpy as np
+# import os
+# # 加载训练数据集文件
+# recognizer = cv2.face.LBPHFaceRecognizer_create()
+# recognizer.read('./data/trainer.yml')
+#
+# faceCascade = cv2.CascadeClassifier("D:\Program Files\OpenCV\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml")
+# font = cv2.FONT_HERSHEY_SIMPLEX
+# id = 0
+# # 准备识别的图片
+# img = cv2.imread('./data/jm/1.pgm') #识别的图片
+# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# faces = faceCascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+# for(x, y, w, h) in faces:
+#     cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
+#     #人脸识别
+#     id, confidence = recognizer.predict(gray[y:y+h, x:x+w])
+#     print('标签id:', id, '置信评分:', confidence)
+#
+# cv2.imshow('camera', img)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
