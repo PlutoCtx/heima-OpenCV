@@ -1,6 +1,6 @@
 # @Version: python3.10
 # @Time: 2023/1/18 9:42
-# @Author: MaxBorooks
+# @Author: MaxBrooks
 # @Email: chentingxian195467@163.com
 # @File: OpenCV02.py
 # @Software: PyCharm
